@@ -93,7 +93,8 @@ class MainActivity : AppCompatActivity() {
                 // Toast.makeText(this, "rawMsgs is not null", Toast.LENGTH_SHORT).show()
             } else {
                 // Toast.makeText(this, "rawMsgs is null", Toast.LENGTH_SHORT).show()
-                // 不知為何，讀卡後會進到這個地方⋯⋯（也許是因為它 immutable 吧？不確定）
+                // 讀卡後進到這個地方或許是因為，收到的是 ACTION_TECH_DISCOVERED intent，
+                // 所以 EXTRA_NDEF_MESSAGES 裡面才沒有東西！
                 // val empty = ByteArray(0)
                 // val id = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID)
                 val tag = intent.getParcelableExtra<Parcelable>(NfcAdapter.EXTRA_TAG) as Tag
