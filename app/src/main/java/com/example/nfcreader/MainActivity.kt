@@ -17,33 +17,41 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-        if (nfcAdapter == null) {
-            Toast.makeText(this, "No NFC", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
-
-        val intent = Intent(this, this.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+        initNfcAdapter()
     }
 
     override fun onResume() {
         super.onResume()
 
-        val nfcAdapterRefCopy = nfcAdapter
-        if (nfcAdapterRefCopy != null) {
-            if (!nfcAdapterRefCopy.isEnabled()) {
-                showNFCSettings()
-            }
-            nfcAdapterRefCopy.enableForegroundDispatch(this, pendingIntent, null, null)
-        }
+        enableNfcForegroundDispatch()
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
         setIntent(intent)
+    }
+
+    private fun initNfcAdapter() {
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        if (nfcAdapter == null) {
+            Toast.makeText(this, "No NFC", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+    }
+
+    private fun enableNfcForegroundDispatch() {
+        val nfcAdapterRefCopy = nfcAdapter
+        val intent = Intent(this, this.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+
+        if (nfcAdapterRefCopy != null) {
+            if (!nfcAdapterRefCopy.isEnabled()) {
+                showNFCSettings()
+            }
+            nfcAdapterRefCopy.enableForegroundDispatch(this, pendingIntent, null, null)
+        }
     }
 
     private fun showNFCSettings() {
