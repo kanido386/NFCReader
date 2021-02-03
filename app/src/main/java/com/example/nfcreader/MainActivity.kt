@@ -28,10 +28,11 @@ class MainActivity : AppCompatActivity() {
         enableNfcForegroundDispatch()
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
         setIntent(intent)
+        resolveIntent(intent)
     }
 
     override fun onPause() {
@@ -75,5 +76,23 @@ class MainActivity : AppCompatActivity() {
             // Log.e(getTag(), "Error disabling NFC foreground dispatch", e)
         }
     }
+
+    private fun resolveIntent(intent: Intent) {
+        val action = intent.action
+
+        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)
+            || NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)
+            || NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+            if (rawMsgs != null) {
+                // Toast.makeText(this, "rawMsgs is not null", Toast.LENGTH_SHORT).show()
+            } else {
+                // Toast.makeText(this, "rawMsgs is null", Toast.LENGTH_SHORT).show()
+                // 不知為何，讀卡後會進到這個地方⋯⋯
+                
+            }
+        }
+    }
+
 
 }
