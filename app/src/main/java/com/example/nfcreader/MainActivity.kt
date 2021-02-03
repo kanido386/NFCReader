@@ -6,7 +6,9 @@ import android.nfc.NfcAdapter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings.ACTION_NFC_SETTINGS
+import android.util.Log
 import android.widget.Toast
+import androidx.coordinatorlayout.widget.CoordinatorLayout.Behavior.getTag
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +32,12 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
 
         setIntent(intent)
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        disableNfcForegroundDispatch()
     }
 
     private fun initNfcAdapter() {
@@ -59,4 +67,13 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(ACTION_NFC_SETTINGS)
         startActivity(intent)
     }
+
+    private fun disableNfcForegroundDispatch() {
+        try {
+            nfcAdapter?.disableForegroundDispatch(this)
+        } catch (e: IllegalStateException) {
+            // Log.e(getTag(), "Error disabling NFC foreground dispatch", e)
+        }
+    }
+
 }
