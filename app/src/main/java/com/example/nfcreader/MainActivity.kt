@@ -1,19 +1,19 @@
 package com.example.nfcreader
 
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
-import android.nfc.NdefMessage
-import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.Settings.ACTION_NFC_SETTINGS
-import android.util.Log
 import android.widget.Toast
-import androidx.coordinatorlayout.widget.CoordinatorLayout.Behavior.getTag
+import androidx.appcompat.app.AppCompatActivity
 import com.example.nfcreader.utils.Utils
+import org.json.JSONObject
+import java.io.*
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -102,7 +102,63 @@ class MainActivity : AppCompatActivity() {
                 // val record = NdefRecord(NdefRecord.TNF_UNKNOWN, empty, id, payload)
                 // val emptyMsg = NdefMessage(arrayOf(record))
                 // val emptyNdefMessages: Array<NdefMessage> = arrayOf(emptyMsg)
-                Toast.makeText(this, dumpTagData(tag), Toast.LENGTH_SHORT).show()
+                // Toast.makeText(this, dumpTagData(tag), Toast.LENGTH_SHORT).show()
+
+                // ======== Check whether the ID has appeared ========
+
+                val filename = "userList.txt"
+                val file = File(this.getFilesDir(), filename)
+
+                // the way to delete file
+                // file.delete()
+
+                if (!file.exists()) {
+                    val fileContents = ""
+                    this.openFileOutput(filename, Context.MODE_PRIVATE).use {
+                        it.write(fileContents.toByteArray())
+                    }
+                }
+
+                // Read data
+                val fileReader = FileReader(file)
+                val bufferedReader = BufferedReader(fileReader)
+                val stringBuilder = java.lang.StringBuilder()
+                var line: String
+                do {
+                    try { line = bufferedReader.readLine() } catch (e: Exception) { stringBuilder.append(""); break }
+                    stringBuilder.append(line).append("\n")
+                } while (true)
+                bufferedReader.close()
+                val response = stringBuilder.toString()
+
+                // String to JSON
+                val jsonObject: JSONObject
+                if (response == "") {
+                    jsonObject = JSONObject()
+                } else {
+                    jsonObject = JSONObject(response)
+                }
+
+                // Check whether the ID has appeared
+                if (jsonObject.has(dumpTagData(tag))) {
+                    Toast.makeText(this, "刷過囉！", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "歡迎歡迎～", Toast.LENGTH_SHORT).show()
+                }
+
+                // Append new id
+                jsonObject.put(dumpTagData(tag), true);
+
+                // Convert JsonObject to String Format
+                val userString: String = jsonObject.toString()
+
+                // Write back to the file
+                val fileWriter = FileWriter(file)
+                val bufferedWriter = BufferedWriter(fileWriter)
+                bufferedWriter.write(userString)
+                bufferedWriter.close()
+
+                // ======== Check whether the ID has appeared ========
             }
         }
     }
@@ -112,8 +168,9 @@ class MainActivity : AppCompatActivity() {
         val sb = StringBuilder()
         val id = tag.getId()
 
-        sb.append("ID: ").append(Utils.toHex(id)).append('\n')
-        sb.append("Have fun!")
+        // sb.append("ID: ").append(Utils.toHex(id)).append('\n')
+        // sb.append("Have fun!")
+        sb.append(Utils.toHex(id))
 
         return sb.toString()
     }
